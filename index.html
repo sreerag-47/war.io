@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#102420">
+  <title>War.io ┬╖ Aster Island</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main class="atlas" aria-labelledby="map-title">
+    <div id="viewport"></div>
+    <div class="hud-top">
+      <header class="map-heading">
+        <div class="brand">WAR<span>.IO</span></div>
+        <div><h1 id="map-title">Aster Island</h1><span id="match-description"></span></div>
+      </header>
+      <section class="national-status" aria-label="Match status">
+        <div class="phase"><span id="phase">Placement</span><strong id="timer">Choose land</strong></div>
+        <div class="balances" id="balances" hidden>
+          <div><span class="home-label">Ember at home</span><strong id="population">0</strong><small id="growth-rate"></small></div>
+          <div class="treasury"><span>Coins</span><strong id="coins">0</strong><small id="coin-rate"></small></div>
+        </div>
+      </section>
+    </div>
+    <section id="offers" class="dispatch" aria-label="Incoming diplomatic offers" hidden>
+      <div class="dispatch-head">
+        <button id="toggle-offers" type="button" aria-controls="offer-body" aria-expanded="true">Incoming offers <span id="offer-count"></span></button>
+        <button type="button" id="offer-next" hidden>Next offer</button>
+      </div>
+      <div id="offer-body">
+        <h2 id="offer-title" aria-live="polite"></h2>
+        <p id="offer-terms"></p>
+        <p id="offer-reason"></p>
+        <div class="offer-response"><button id="offer-accept" type="button">Accept</button><button id="offer-reject" type="button">Reject</button><span id="offer-time"></span></div>
+      </div>
+    </section>
+    <div class="hud-bottom">
+      <div class="field-readout">
+        <div class="map-readout" id="inspection" hidden></div>
+        <p id="message" role="status" hidden></p>
+        <p class="map-order" id="map-order">Click land to place your capital.</p>
+      </div>
+      <aside aria-label="Command panel">
+        <div class="dock-tabs">
+          <nav class="tabs" role="tablist" aria-label="Nation controls">
+          <button id="tab-match" type="button" role="tab" aria-selected="true" aria-controls="panel-match">Match</button>
+          <button id="tab-orders" type="button" role="tab" aria-selected="false" aria-controls="panel-orders" tabindex="-1">Orders</button>
+          <button id="tab-build" type="button" role="tab" aria-selected="false" aria-controls="panel-build" tabindex="-1">Build</button>
+          <button id="tab-diplomacy" type="button" role="tab" aria-selected="false" aria-controls="panel-diplomacy" tabindex="-1">Diplomacy</button>
+          </nav>
+          <button id="toggle-controls" type="button" aria-expanded="true" aria-label="Hide controls" title="Hide controls" aria-controls="command-body"><i aria-hidden="true"></i></button>
+        </div>
+        <div id="command-body">
+        <section class="panel" id="panel-match" role="tabpanel" aria-labelledby="tab-match">
+          <div class="section-head"><h3>Match setup</h3><button id="reset" type="button">New match</button></div>
+          <div class="form-row"><label for="bot-count">Bot opponents</label><select id="bot-count"></select></div>
+          <div class="form-row"><span>Current seed</span><output id="current-seed"></output></div>
+          <form id="seed-form" aria-label="Load an island">
+            <label for="seed-input">Replay an island</label>
+            <div class="field-pair"><input id="seed-input" type="text" inputmode="numeric" placeholder="Map seed" aria-label="Map seed" autocomplete="off" spellcheck="false" aria-describedby="seed-error"><button type="submit">Load island</button></div>
+            <p id="seed-error" role="alert"></p>
+          </form>
+          <p class="meta" id="map-size"></p>
+          <details class="divider"><summary>Nations <span id="survivors"></span></summary>
+            <table><thead><tr><th scope="col">Nation</th><th scope="col">People</th><th scope="col">Coins</th></tr></thead><tbody id="players"></tbody></table>
+          </details>
+          <details class="divider"><summary>Field guide</summary>
+            <div class="guide">
+              <div class="map-key"><b>Expansion speed</b><div id="terrain-key"></div></div>
+              <p><b>Replay.</b> The same bot count and seed give you the same coast and terrain. Click land once to start 30 seconds of expansion for everyone.</p>
+              <p><b>Economy.</b> Every nation gets 35 coins when expansion ends. After that, nations split 10 coins per second by population share. Factories, ports and trade bring in extra coins.</p>
+              <p><b>Combat.</b> Each tile settled during expansion adds four people. As soon as your borders meet, set a force in Orders and click the rival's land. Each nation continues expanding during the fight. A force that falls to half strength captures land at 35% speed. Send at least twice the defenders to take the whole nation at once.</p>
+              <p><b>Construction.</b> Select a building in Build, then click an empty site in your territory. A captured building serves its new owner.</p>
+              <p><b>Diplomacy.</b> Answer incoming offers directly on the map. Allies protect your shared border, trade pays both sides after expansion and a truce buys 20 seconds of peace. Rivals also negotiate with one another. Their decisions appear in Diplomacy. If all surviving rivals are your allies, you can claim an allied victory after expansion.</p>
+              <p><b>Military help.</b> Choose an ally in Diplomacy to request an attack on a rival or reinforcements at home. An attacking ally needs a border with the rival and claims the land it takes. Defenders can travel across the island and stay for up to 20 seconds. When an ally asks you for troops, the request shows exactly how many you would send.</p>
+              <p><b>Map controls.</b> Scroll to zoom. With the map focused, use arrow keys to inspect a tile and Enter to select it.</p>
+            </div>
+          </details>
+        </section>
+        <section class="panel" id="panel-orders" role="tabpanel" aria-labelledby="tab-orders" hidden>
+          <h3>Military orders</h3>
+          <label class="form-row" for="commit">Attack commitment <output for="commit" id="commit-label">50%</output></label>
+          <input id="commit" type="range" min="10" max="100" step="1" value="50" disabled>
+          <p class="note" id="attack-status"></p>
+          <ul id="allied-forces" aria-label="Allied deployments" hidden></ul>
+          <div class="population-meter" title="Share of population capacity used"><i id="capacity-meter"></i></div>
+          <div class="section-head divider"><h3>National upgrades</h3><span id="shop-state"></span></div>
+          <div id="shop-items"></div>
+        </section>
+        <section class="panel" id="panel-build" role="tabpanel" aria-labelledby="tab-build" hidden>
+          <h3>Infrastructure</h3>
+          <p class="note" id="build-help">Choose a building, then click a vacant tile you own.</p>
+          <div id="build-options" aria-describedby="build-help"></div>
+        </section>
+        <section class="panel" id="panel-diplomacy" role="tabpanel" aria-labelledby="tab-diplomacy" hidden>
+          <h3>Foreign relations</h3>
+          <label class="form-row" for="partner">Negotiate with <select id="partner"></select></label>
+          <div class="embassy" id="embassy">
+            <div class="section-head"><strong id="personality"></strong><span id="opinion"></span></div>
+            <p class="note" id="partner-description"></p>
+            <p id="treaties"></p>
+          </div>
+          <section id="military-help" aria-labelledby="help-heading" hidden>
+            <h4 id="help-heading">Military help</h4>
+            <p id="help-strength" class="note"></p>
+            <label class="form-row" for="help-rival">Attack target <select id="help-rival"></select></label>
+            <div class="help-actions">
+              <button type="button" id="ask-attack" aria-describedby="help-availability">Request attack</button>
+              <button type="button" id="ask-defense" aria-describedby="help-availability">Request defense</button>
+            </div>
+            <p id="help-availability" class="note"></p>
+            <p id="help-reply" role="status"></p>
+          </section>
+          <div id="diplomatic-actions"></div>
+          <button type="button" id="claim-victory" hidden>Claim allied victory</button>
+          <details class="divider" id="report-details"><summary>Diplomatic activity</summary><ol id="diplomatic-history"></ol></details>
+        </section>
+        </div>
+      </aside>
+    </div>
+  </main>
+  <script type="module" src="/main.js"></script>
+</body>
+</html>
