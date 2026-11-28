@@ -12,6 +12,7 @@ const botCount = element('bot-count');
 const seedForm = element('seed-form');
 const seedInput = element('seed-input');
 const seedError = element('seed-error');
+const restartIsland = element('restart-island');
 for (let count = MIN_BOTS; count <= MAX_BOTS; count++) {
   botCount.add(new Option(String(count), String(count)));
 }
@@ -461,6 +462,7 @@ function renderPanel() {
   element('balances').hidden = game.phase === 'placement';
   botCount.disabled = game.phase !== 'placement';
   seedForm.hidden = game.phase !== 'placement';
+  restartIsland.hidden = game.phase === 'placement';
   const phaseLabels = { placement: 'Placement', expansion: 'Expansion', battle: 'Combat', finished: 'Match over' };
   element('phase').textContent = phaseLabels[game.phase];
   let status = 'Choose land';
@@ -593,6 +595,13 @@ element('reset').addEventListener('click', () => {
   seedInput.value = '';
   clearSeedError();
   newMatch();
+});
+restartIsland.addEventListener('click', () => {
+  if (game.phase === 'placement') return;
+  seedInput.value = '';
+  clearSeedError();
+  newMatch(game.seed);
+  element('tab-match').focus();
 });
 botCount.addEventListener('change', () => {
   if (game.phase === 'placement') newMatch(game.seed);
